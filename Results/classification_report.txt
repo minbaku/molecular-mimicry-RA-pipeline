@@ -1,0 +1,31 @@
+Random Forest Classification Report
+=============================================
+
+                     precision    recall  f1-score   support
+
+      Non-Mimic (N)       1.00      0.85      0.92        27
+Confirmed Mimic (Y)       0.93      1.00      0.96        53
+
+           accuracy                           0.95        80
+          macro avg       0.96      0.93      0.94        80
+       weighted avg       0.95      0.95      0.95        80
+
+AUC-ROC Score: 0.954
+
+Confusion Matrix:
+[[23  4]
+ [ 0 53]]
+
+Feature Importances:
+                        Feature  Importance
+           BLOSUM80_per_residue    0.257316
+    Alignment_coverage_sequence    0.186886
+                   Identical aa    0.129895
+            Identity percentage    0.124528
+                 BLOSUM80 score    0.117185
+    Alignment length (Sequence)    0.095388
+                   Human length    0.044663
+Structural alignment coverage %    0.016846
+                    %Rank_EL(X)    0.013254
+                     Aff(nM)(X)    0.008248
+                pathogen length    0.005790

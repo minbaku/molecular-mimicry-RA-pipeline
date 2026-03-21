@@ -1,4 +1,4 @@
-# Computational Identification of Molecular Mimicry in RA-Associated Pathogens
+# MimicryDB-Auto: Structural Validation of Molecular Mimicry Across Autoimmune Rheumatic Diseases
 ## A Structural Validation and Machine Learning Approach
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -14,10 +14,11 @@ for autoimmune triggering in Rheumatoid Arthritis, yet most computational
 studies rely exclusively on sequence similarity metrics for mimic identification. 
 This study presents an integrative three-tier pipeline combining MHC epitope 
 prediction, BLAST-based sequence alignment, and atomic structural validation 
-via TM-align across 32 RA-associated pathogens. Sequence identity showed 
-near-zero correlation with structural similarity (r = -0.127), demonstrating 
-that structural validation is indispensable for reliable mimicry identification 
-and cannot be substituted by sequence-based screening alone.
+via TM-align across 32 RA-associated pathogens. Sequence identity showed a 
+statistically significant but practically negligible correlation with structural 
+RMSD (r = -0.127, p = 0.036, R² = 0.016), demonstrating that structural validation 
+is indispensable for reliable mimicry identification and cannot be substituted by 
+sequence-based screening alone.
 
 ---
 

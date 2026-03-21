@@ -156,6 +156,7 @@ the top of each notebook.
 | Specificity | 85.2% |
 | Overall accuracy | 95% |
 | Top feature | BLOSUM80 per residue (0.257) |
+|Cross-validated AUC-ROC 0.987 ± 0.012
 
 ---
 

@@ -25,7 +25,7 @@ and cannot be substituted by sequence-based screening alone.
 
 - **399 peptide pairs** curated across **32 organisms**, covering both 
   MHC class I and class II epitopes
-- **96.7% structural confirmation rate** — peptide pairs predicted 
+- **65.7% structural confirmation rate** — peptide pairs predicted 
   computationally and validated at atomic resolution (RMSD < 2.0 Å)
 - **r = -0.127** between sequence identity and structural RMSD — 
   near-zero correlation confirming sequence similarity does not predict 

@@ -1,9 +1,9 @@
 # Dataset Description
 
-## File: ML_targets_final.csv
+## File: MimicryDB-Auto.csv
 
 ## Overview
-399 peptide pairs spanning 32 RA-associated organisms.
+399 pathogen-host peptide pairs spanning 32 organisms implicated in autoimmune rheumatic diseases and Guillain-Barré syndrome.
 Labels assigned based on TM-align structural validation (RMSD threshold 2.0 Å).
 
 ## Columns
@@ -37,20 +37,37 @@ Labels assigned based on TM-align structural validation (RMSD threshold 2.0 Å).
 | Alignment_coverage_sequence | float | Sequence alignment coverage capped at 100% — derived feature |
 
 ## Label Assignment
-- Y (Confirmed Mimic): Structural RMSD < 2.0 Å
-- N (Non-Mimic): Structural RMSD >= 2.0 Å
+- **Y (Confirmed Mimic)**: Structural RMSD < 2.0 Å
+- **N (Non-Mimic)**: Structural RMSD ≥ 2.0 Å
 
 ## Class Distribution
 - Confirmed Mimics (Y): 262
 - Non-Mimics (N): 137
 - Total: 399
 
+## Strong vs Weak Mimic Subclassification
+- **Strong Mimics**: RMSD < 1.0 Å (n = 159)
+- **Weak Mimics**: 1.0 Å ≤ RMSD < 2.0 Å (n = 103)
+
 ## Missing Values
-- BLOSUM-derived features are NaN for negative examples
-  (negatives were not processed through BLAST alignment)
+- BLOSUM-derived features and sequence alignment columns are zero-coded for N-class entries
+  (negatives constructed by cross-pairing have no biologically meaningful BLAST signal)
 - 1 missing TM-score value
 
+## Key Findings (from analysis)
+- Sequence identity explains at most 1.6% of variance in structural RMSD (r = -0.127, R² = 0.016)
+- No individual sequence feature significantly discriminates mimics from non-mimics
+- 91.9% of randomly cross-paired sequence-similar 9-aa pairs achieve RMSD < 2.0 Å
+- 99.2% of structurally equivalent cross-pairs have zero detectable sequence similarity
+
 ## Notes
-Negative examples were constructed by cross-pairing pathogen and human 
-peptides from the same pre-filtered pool. See manuscript Methods section 
-for full details and associated limitations.
+Negative examples (N class) were constructed by cross-pairing pathogen peptides with human
+peptide matches drawn from the same pre-filtered pool of BLAST-confirmed sequence-similar
+proteins, paired with a different pathogen peptide than their original match.
+See manuscript Methods Section 2.5.5 for full details and associated limitations.
+
+## Citation
+If using this dataset, please cite:
+Ilahi M. MimicryDB-Auto: Structural Validation Reveals the Inadequacy of
+Sequence-Based Molecular Mimicry Screening in Autoimmunity. [Year].
+Available at: https://github.com/minbaku/molecular-mimicry-RA-pipeline

@@ -52,7 +52,6 @@ Labels assigned based on TM-align structural validation (RMSD threshold 2.0 Å).
 ## Missing Values
 - BLOSUM-derived features and sequence alignment columns are zero-coded for N-class entries
   (negatives constructed by cross-pairing have no biologically meaningful BLAST signal)
-- 1 missing TM-score value
 
 ## Key Findings (from analysis)
 - Sequence identity explains at most 1.6% of variance in structural RMSD (r = -0.127, R² = 0.016)

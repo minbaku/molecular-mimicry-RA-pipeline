@@ -68,5 +68,5 @@ See manuscript Methods Section 2.5.5 for full details and associated limitations
 ## Citation
 If using this dataset, please cite:
 Ilahi M. MimicryDB-Auto: Structural Validation Reveals the Inadequacy of
-Sequence-Based Molecular Mimicry Screening in Autoimmunity. [Year].
+Sequence-Based Molecular Mimicry Screening in Autoimmunity. 2026.
 Available at: https://github.com/minbaku/molecular-mimicry-RA-pipeline

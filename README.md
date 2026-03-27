@@ -1,76 +1,89 @@
-# MimicryDB-Auto: Structural Validation of Molecular Mimicry Across Autoimmune Rheumatic Diseases
-## A Structural Validation and Machine Learning Approach
+# MimicryDB-Auto: Structural Validation Reveals the Inadequacy of Sequence-Based Molecular Mimicry Screening in Autoimmunity
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/)
-[![Status: Complete](https://img.shields.io/badge/status-complete-green.svg)]()
+## A Curated Multi-Pathogen Dataset and Reproducible Analysis Pipeline
+
+[![License: CC BY 4.0](https://img.shields.io/badge/License-CC%20BY%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by/4.0/)
+[![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/)
+[![DOI:10.5281/zenodo.19262752](https://zenodo.org/badge/1182709738.svg)](https://zenodo.org/doi/10.5281/zenodo.19262752)
 
 ---
 
 ## Abstract
 
-Molecular mimicry between pathogen and host peptides is a proposed mechanism 
-for autoimmune triggering in Rheumatoid Arthritis, yet most computational 
-studies rely exclusively on sequence similarity metrics for mimic identification. 
-This study presents an integrative three-tier pipeline combining MHC epitope 
-prediction, BLAST-based sequence alignment, and atomic structural validation 
-via TM-align across 32 RA-associated pathogens. Sequence identity showed a 
-statistically significant but practically negligible correlation with structural 
-RMSD (r = -0.127, p = 0.036, R² = 0.016), demonstrating that structural validation 
-is indispensable for reliable mimicry identification and cannot be substituted by 
-sequence-based screening alone.
+Molecular mimicry—structural or sequence similarity between pathogen-derived and host self-peptides sufficient to trigger cross-reactive immune responses—has been proposed as a mechanism of autoimmune triggering across rheumatoid arthritis, systemic lupus erythematosus, ankylosing spondylitis, systemic sclerosis, antiphospholipid syndrome, dermatomyositis, and Guillain-Barré syndrome. Computational identification of mimicry candidates has historically relied on sequence-based metrics, resting on the untested assumption that sequence similarity predicts structural similarity at the MHC-presented peptide level.
+
+We present **MimicryDB-Auto**, the first curated, labelled multi-pathogen dataset integrating MHC epitope prediction, sequence alignment, and atomic structural validation at the individual epitope level across both MHC class I and II presentations, comprising **399 pathogen-host peptide pairs** spanning **32 organisms** constructed through a reproducible seven-step pipeline.
+
+**Key findings:**
+- Sequence identity explains at most **1.6% of variance** in structural RMSD (r = −0.127, R² = 0.016)
+- **91.9%** of randomly cross-paired sequence-similar 9-aa pairs achieve structural equivalence (RMSD < 2.0 Å)
+- **99.2%** of structurally equivalent cross-pairs have zero detectable sequence similarity
+- A multivariate sequence signal exists (AUC = 0.841) but cannot substitute for structural validation
+
+MimicryDB-Auto and the complete reproducible pipeline are publicly available at this repository.
 
 ---
 
 ## Key Findings
 
-- **399 peptide pairs** curated across **32 organisms**, covering both 
-  MHC class I and class II epitopes
-- **65.7% structural confirmation rate** — peptide pairs predicted 
-  computationally and validated at atomic resolution (RMSD < 2.0 Å)
-- **r = -0.127** between sequence identity and structural RMSD — 
-  near-zero correlation confirming sequence similarity does not predict 
-  structural mimicry
-- **Random forest classifier AUC = 0.954** with **100% sensitivity** 
-  for confirmed mimics (zero false negatives)
-- **BLOSUM80 per residue** ranked as top predictive feature 
-  (importance = 0.257), outperforming raw sequence metrics
+| Finding | Statistical Evidence | Interpretation |
+|---------|---------------------|----------------|
+| Sequence identity vs RMSD | r = −0.127, p = 0.036, R² = 0.016 | Significant but negligible relationship |
+| BLOSUM80 discriminability | p < 0.0001 (Mann-Whitney U) | Reflects class construction, not independent sequence discrimination |
+| RF multivariate signal (Y vs N) | AUC = 0.958 (95% CI: 0.886–0.999) | Upper bound; inflated by categorical construction |
+| RF multivariate signal (Strong vs Weak) | AUC = 0.841 | Genuine signal but insufficient alone |
+| Cross-pair structural equivalence | 91.9% (125/136) | Structural equivalence is modal outcome |
+| Sequence-dissimilar structural mimics | 99.2% of equivalent cross-pairs | Mimicry invisible to conventional screening |
 
 ---
 
 ## Pipeline Overview
+
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    INPUT: Pathogen Peptides                  │
-│              (literature-curated RA-associated)              │
+│                  STEP 1: Pathogen Selection                 │
+│         Systematic literature review (32 organisms)         │           
 └─────────────────────┬───────────────────────────────────────┘
                       │
                       ▼
 ┌─────────────────────────────────────────────────────────────┐
-│              TIER 1: Epitope Prediction                      │
-│         NetMHCpan 4.1 — MHC binding affinity                │
-│         %Rank_EL threshold, immunogenicity scoring          │
+│              STEP 2: MHC Epitope Prediction                 │
+│        NetMHCpan 4.1 (Class I) / NetMHCIIpan 4.0 (Class II) │
+│               %Rank EL ≤ 0.5, IC50 ≤ 50 nM                  │        
 └─────────────────────┬───────────────────────────────────────┘
                       │
                       ▼
 ┌─────────────────────────────────────────────────────────────┐
-│              TIER 2: Sequence Alignment                      │
-│         BLAST with BLOSUM80 substitution matrix             │
-│         Identity %, alignment length, coverage              │
+│               STEP 3: Sequence Alignment                    │
+│          BLASTp vs Human Proteome (BLOSUM80)                │
+│        ≥50% identity, ≥90% coverage threshold               │
 └─────────────────────┬───────────────────────────────────────┘
                       │
                       ▼
 ┌─────────────────────────────────────────────────────────────┐
-│              TIER 3: Structural Validation                   │
-│         TM-align — atomic structural comparison             │
-│         RMSD threshold 2.0 Å for mimic confirmation         │
+│              STEP 4: Structural Extraction                  │
+│    Peptide coordinates from PDB/Swiss-Prot/AlphaFold        │
+│         PyMOL extraction of relevant residues               │
 └─────────────────────┬───────────────────────────────────────┘
                       │
                       ▼
 ┌─────────────────────────────────────────────────────────────┐
-│              TIER 4: ML Classification                       │
-│         Random Forest — leakage-free feature set            │
-│         AUC 0.954, 100% sensitivity, 95% accuracy           │
+│              STEP 5: Structural Validation                  │
+│            TM-align structural superposition                │
+│            RMSD < 2.0 Å = Confirmed Mimic (Y)               │
+└──────────────────────┬───────────────────────────────────────┘
+                       │
+                       ▼
+┌─────────────────────────────────────────────────────────────┐
+│              STEP 6: Feature Extraction                     │
+│      Sequence, structural, and immunological features       │               
+
+└──────────────────────┬───────────────────────────────────────┘
+                       │
+                       ▼
+┌─────────────────────────────────────────────────────────────┐
+│                STEP 7: Analysis & ML                        │
+│    Pearson correlation, Mann-Whitney U, Random Forest       │                     
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -80,28 +93,29 @@ sequence-based screening alone.
 ```
 molecular-mimicry-RA-pipeline/
 │
-├── README.md
-│
+├── Results/
+│   └── KEY_RESULTS.txt
+|
 ├── data/
 │   ├── ML_targets_final.csv        # complete labelled dataset
 │   └── data_description.md         # column definitions and methodology
 │
+├── figures/
+│   ├── figure1_rmsd_vs_identity.png
+│   ├── figure2_rmsd_by_disease.png
+│   ├── figure3_rmsd_distribution.png
+│   ├── figure4_boxplots.png
+│   ├── figure5_correlation_heatmap.png
+│   └── figure6_importance_roc.png
+|   └── figure7_confusion_matrix.png
+|
 ├── notebooks/
 │   ├── 01_data_loading_cleaning.ipynb
 │   ├── 02_statistical_analysis.ipynb
-│   ├── 03_figures.ipynb
-│   └── 04_ml_model.ipynb
+│   ├── 03_ml_model.ipynb
+│   └── 04_figures.ipynb
 │
-├── figures/
-│   ├── figure1_rmsd_vs_identity.png
-│   ├── figure2_rmsd_distribution.png
-│   ├── figure3_boxplots.png
-│   ├── figure4_correlation_heatmap.png
-│   ├── figure5_importance_roc.png
-│   └── figure6_confusion_matrix.png
-│
-├── results/
-│   └── classification_report.txt
+├── README.md
 │
 └── requirements.txt
 ```
@@ -131,50 +145,59 @@ the top of each notebook.
 
 ## Dataset
 
+
 | Property | Value |
 |----------|-------|
 | Total peptide pairs | 399 |
-| Confirmed mimics (Y) | 262 |
-| Non-mimics (N) | 137 |
-| Organisms | 32 |
+| Confirmed mimics (Y, RMSD < 2.0 Å) | 262 |
+| Non-mimics (N, RMSD ≥ 2.0 Å) | 137 |
+| Strong mimics (RMSD < 1.0 Å) | 159 |
+| Weak mimics (1.0–2.0 Å) | 103 |
+| Organisms represented | 32 |
 | MHC coverage | Class I and II |
-| Missing values | 0 |
+| Autoimmune conditions | RA, SLE, GBS, AS, SSc, APS, dermatomyositis |
 | Structural validation method | TM-align |
-| RMSD threshold | 2.0 Å |
-
+| RMSD confirmation threshold | 2.0 Å |
 ---
 
 ## Results Summary
 
-| Metric | Value |
-|--------|-------|
-| Structural confirmation rate | 96.7% |
-| Identity % vs RMSD correlation | -0.127 |
-| BLOSUM80 vs TM-score correlation | -0.039 |
-| Classifier AUC-ROC | 0.954 |
-| Sensitivity (mimic recall) | 100% |
-| Specificity | 85.2% |
-| Overall accuracy | 95% |
-| Top feature | BLOSUM80 per residue (0.257) |
-|Cross-validated AUC-ROC 0.987 ± 0.012
+### Classification Results
+#### Y vs N Classifier (2.0 Å threshold)
+Note: This classifier distinguishes Y-class (sequence-similar) from N-class (zero sequence similarity by construction) and represents an upper bound on classifier performance.
+
+|Metric |	Value	| 95% CI |
+|-------|-------|--------|
+|AUC-ROC | 0.958 |	0.886–0.999 |
+|Sensitivity |	1.000 |	1.000–1.000 |
+|Specificity |	0.852 |	0.708–0.967 |
+|Accuracy |	0.950 |	0.900–0.988 |
+|5-fold CV AUC |	0.979 ± 0.018 |	— |
+---
+
+#### Strong vs Weak Mimic Classifier (1.0 Å threshold)
+Biologically relevant test within the sequence-similar pool.
+
+|Metric |	Value |
+|-------|-------|
+|Test AUC-ROC |	0.841 |
+|5-fold CV AUC |	0.823 ± 0.053 |
 
 ---
 
 ## Preprint
 
-> **Coming soon on bioRxiv**
-> Link will be added upon publication.
+> **Available on Zenodo**
+> https://doi.org/10.5281/zenodo.19262132
 > 
-> *Ilahi M. (2026). Computational Identification of Molecular Mimicry 
-> in RA-Associated Pathogens: A Structural Validation and Machine 
-> Learning Approach.*
+> *Ilahi, M. (2026). MimicryDB-Auto: Structural Validation Reveals the Inadequacy of Sequence-Based Molecular Mimicry Screening in Autoimmunity. Zenodo. https://doi.org/10.5281/zenodo.19262132*
 
 ---
 
 ## Publication
 
 > **Manuscript in preparation**
-> Target submission: Exploration of Immunology, March 2026
+> Target submission: March 2026
 
 ---
 
@@ -194,9 +217,7 @@ M.Tech Biotechnology, Guru Gobind Singh Indraprastha University, Delhi
 
 If you use this dataset or pipeline, please cite:
 ```
-Ilahi, M. (2026). Computational Identification of Molecular Mimicry 
-in RA-Associated Pathogens: A Structural Validation and Machine 
-Learning Approach. Manuscript in preparation.
+Minza-Ilahi. (2026). minbaku/molecular-mimicry-RA-pipeline: MimicryDB_Auto_v1 (MimicryDB_Auto_v.1). Zenodo. https://doi.org/10.5281/zenodo.19262752
 ```
 
 ---

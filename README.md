@@ -130,61 +130,31 @@ Cross-pair validation, threshold sensitivity analysis
 molecular-mimicry-RA-pipeline/
 
 │
-
 ├── MimicryDB-Auto/                         # Rheumatic diseases + GBS dataset
-
 │   ├── data/
-
 │   │   ├── ML_targets_final.csv            # labelled dataset (399 pairs)
-
 │   │   └── data_description.md             # column definitions
-
-│   ├── notebooks/
-
-│   │   ├── 01_data_loading_cleaning.ipynb
-
-│   │   ├── 02_statistical_analysis.ipynb
-
-│   │   ├── 03_ml_model.ipynb
-
-│   │   └── 04_figures.ipynb
-
+|   |
 │   ├── figures/                            # publication-quality figures
-
 │   └── Results/
-
 │       └── KEY_RESULTS.txt
-
 │
-
 ├── MimicryDB-Neuro/                        # Neurodegenerative diseases dataset
-
 │   ├── data/
-
-│   │   ├── ML_targets_neuro.csv            # labelled dataset (247 pairs)
-
-│   │   └── data_description.md
-
-│   ├── notebooks/
-
-│   │   ├── 01_data_loading_cleaning.ipynb
-
-│   │   ├── 02_statistical_analysis.ipynb
-
-│   │   ├── 03_ml_model.ipynb
-
-│   │   └── 04_figures.ipynb
-
+│   |   ├── ML_targets_neuro.csv            # labelled dataset (247 pairs)
+│   |   └── data_description.md
+|   |
 │   ├── figures/
-
 │   └── Results/
-
 │       └── KEY_RESULTS.txt
-
+|
+├── notebooks/
+│       ├── 01_data_loading_cleaning.ipynb
+│       ├── 02_statistical_analysis.ipynb
+│       ├── 03_ml_model.ipynb
+│       └── 04_figures.ipynb
 │
-
 ├── README.md
-
 └── requirements.txt
 
 ---

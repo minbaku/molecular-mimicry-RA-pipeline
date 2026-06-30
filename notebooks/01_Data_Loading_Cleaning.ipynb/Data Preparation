@@ -1,0 +1,54 @@
+# ── Type conversion + derived features ─────────────────────────────
+# Convert all numeric columns from object type
+for col in ['BLOSUM80 score', 'Identity percentage', 'Alignment length (Sequence)',
+            'Identical aa', 'pathogen length', 'Human length', '%Rank_EL(X)',
+            'Aff(nM)(X)', 'Structural RMSD', 'TM-align score (Human chain 2)',
+            'Structural alignment coverage %', 'Alignment Length (Structure)']:
+    df[col] = pd.to_numeric(df[col], errors='coerce')
+
+# Derived feature 1: BLOSUM80 normalised by alignment length
+df['BLOSUM80_per_residue'] = df['BLOSUM80 score'] / df['Alignment length (Sequence)']
+
+# Derived feature 2: what fraction of pathogen peptide was covered by BLAST
+df['Alignment_coverage_sequence'] = (
+    df['Alignment length (Sequence)'] / df['pathogen length'] * 100
+).clip(upper=100)
+
+# Fill NaN with 0 — these are genuine no-BLAST-hit entries, not missing data
+df['BLOSUM80_per_residue'] = df['BLOSUM80_per_residue'].fillna(0)
+df['Alignment_coverage_sequence'] = df['Alignment_coverage_sequence'].fillna(0)
+
+print('Conversion complete. Shape:', df.shape)
+print('Missing values remaining:')
+print(df.isnull().sum()[df.isnull().sum() > 0])
+
+# ── Define all class subgroups ─────────────────────────────────────
+# Original 2.0 Å binary classification (paper Section 3.1)
+Y_group = df[df['RMSD_Mimic_Target (Y)'] == 'Y']   # RMSD < 2.0 Å
+N_group = df[df['RMSD_Mimic_Target (Y)'] == 'N']   # RMSD >= 2.0 Å
+
+# Three-tier classification at 1.0 Å (paper Section 3.1 / 3.4)
+strong_mimics = df[df['Structural RMSD'] < 1.0]                                         
+weak_mimics   = df[(df['Structural RMSD'] >= 1.0) & (df['Structural RMSD'] < 2.0)]      
+non_mimics    = df[df['Structural RMSD'] >= 2.0]                                         
+
+# Consistent colour scheme used throughout all figures
+strong_color = '#1f78b4'   # deep blue
+weak_color   = '#e6ab02'   # golden
+non_color    = '#d95f02'   # orange-red
+
+# ── Genuine negatives — BLAST-matched but structurally failed ─────────────────
+# These are the only biologically valid non-mimics for statistical comparison
+# (9 pairs that passed sequence filtering but failed structural validation)
+genuine_negatives = df[
+    (df['RMSD_Mimic_Target (Y)'] == 'N') &
+    (df['BLOSUM80 score'] > 0)
+].copy()
+
+print(f"Class composition:")
+print(f"  Y-class (confirmed mimics):      n={len(Y_group)}")
+print(f"    Strong (RMSD < 1.0Å):          n={len(strong_mimics)}")
+print(f"    Weak   (1.0–2.0Å):             n={len(weak_mimics)}")
+print(f"  N-class total:                   n={len(N_group)}")
+print(f"    Genuine negatives (BLAST hit): n={len(genuine_negatives)}")
+print(f"    Cross-paired zeros:            n={len(N_group) - len(genuine_negatives)}")

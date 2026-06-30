@@ -6,7 +6,7 @@
 import pandas as pd
 from scipy.stats import pearsonr
 
-df_plddt_raw = pd.read_excel('/content/pLDDT_Neuro.xlsx')
+df_plddt_raw = pd.read_excel('/content/pLDDT_Neuro.xlsx') # ← change to 'pLDDT_Rheuma' for the Rheumatic dataset
 
 plddt_agg = df_plddt_raw.groupby(['Organism', 'Protein', 'Position']).agg(
     mean_pLDDT_min =('mean_pLDDT', 'min'),

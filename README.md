@@ -15,7 +15,7 @@ Molecular mimicry is the leading mechanistic hypothesis for how infections trigg
 
 This repository tests that assumption systematically and finds it does not hold.
 
-We present **MimicryDB-Auto** and **MimicryDB-Neuro** — the first curated, labelled multi-pathogen structural mimicry datasets integrating MHC epitope prediction, sequence homology filtering, and atomic structural validation at the individual epitope level, applied identically across two independent disease contexts. The central finding is consistent across both datasets: sequence identity explains at most 2.2% of variance in structural RMSD among confirmed mimics. The tool the field relies on is missing the majority of genuine structural mimics.
+I present **MimicryDB-Auto** and **MimicryDB-Neuro** — the first curated, labelled multi-pathogen structural mimicry datasets integrating MHC epitope prediction, sequence homology filtering, and atomic structural validation at the individual epitope level, applied identically across two independent disease contexts. The central finding is consistent across both datasets: sequence identity explains at most 2.2% of variance in structural RMSD among confirmed mimics. The tool the field relies on is missing the majority of genuine structural mimics.
 
 ---
 

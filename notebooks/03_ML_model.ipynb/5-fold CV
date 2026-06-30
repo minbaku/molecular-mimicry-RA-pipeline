@@ -1,0 +1,7 @@
+# ── 5-fold CV for original RF (Y vs N) ────────────────────────────
+cv_orig = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+cv_scores_orig = cross_val_score(rf_model, X, y, cv=cv_orig, scoring='roc_auc')
+
+print('=== 5-Fold CV: Y vs N at 2.0 Å ===')
+print(f'AUC-ROC: {cv_scores_orig.mean():.3f} ± {cv_scores_orig.std():.3f}')
+print(f'Per-fold: {[f"{s:.3f}" for s in cv_scores_orig]}')

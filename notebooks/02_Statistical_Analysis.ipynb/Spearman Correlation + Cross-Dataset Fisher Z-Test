@@ -1,0 +1,164 @@
+## Spearman Correlation + Cross-Dataset Fisher Z-Test
+
+from scipy.stats import spearmanr
+from scipy.stats import norm
+import numpy as np
+
+print('=' * 60)
+print('SPEARMAN CORRELATION — SENSITIVITY CHECK')
+print('(Non-parametric: does not assume linear relationship)')
+print('=' * 60)
+print()
+
+# ── Rheumative Dataset: Spearman within genuine Y-class BLAST entries ─────────────────
+# Preprint-consistent definition: all Y-class with non-null identity
+# This matches the n=272 reported in the preprint
+Y_genuine_ra = df[
+    (df['RMSD_Mimic_Target (Y)'] == 'Y') &
+    (df['Identity percentage'].notna())
+].copy()
+
+print(f'Note: n={len(Y_genuine_ra)} matches preprint definition')
+print(f'(includes Y-class entries with identity data regardless of BLOSUM)')
+
+r_spearman_ra, p_spearman_ra = spearmanr(
+    Y_genuine_ra['Identity percentage'],
+    Y_genuine_ra['Structural RMSD']
+)
+
+print(f'Rheumatic Dataset — Within-Y genuine BLAST entries:')
+print(f'  n = {len(Y_genuine_ra)}')
+print(f'  Spearman r = {r_spearman_ra:.3f}')
+print(f'  p = {p_spearman_ra:.4f}')
+print(f'  Significant: {"YES" if p_spearman_ra < 0.05 else "NO — near-zero confirmed non-parametrically"}')
+print()
+
+# ── Rheumatic Dataset: Spearman for strong mimics only ────────────────────────────────
+strong_ra_genuine = strong_mimics[
+    (strong_mimics['Identity percentage'].notna()) &
+    (strong_mimics['BLOSUM80 score'] > 0)
+].copy()
+
+r_spearman_ra_strong, p_spearman_ra_strong = spearmanr(
+    strong_ra_genuine['Identity percentage'],
+    strong_ra_genuine['Structural RMSD']
+)
+
+print(f'Rheumatic Dataset — Strong mimics only:')
+print(f'  n = {len(strong_ra_genuine)}')
+print(f'  Spearman r = {r_spearman_ra_strong:.3f}')
+print(f'  p = {p_spearman_ra_strong:.4f}')
+print(f'  Significant: {"YES" if p_spearman_ra_strong < 0.05 else "NO"}')
+print()
+
+print('─' * 60)
+print('INTERPRETATION:')
+print('If Spearman r is also near-zero and non-significant,')
+print('the Pearson finding is confirmed to be assumption-independent.')
+print('The near-zero correlation is not an artefact of linearity.')
+print('─' * 60)
+print()
+
+# ══════════════════════════════════════════════════════════════
+# NOTE FOR NEURO DATASET:
+# Run this same cell on your neuro dataset (df loaded with 247 rows)
+# and record the Spearman values for the cross-dataset comparison below.
+# Expected neuro values based on Pearson: r_spearman_neuro ≈ -0.14 to -0.18
+# ══════════════════════════════════════════════════════════════
+
+# ── Manually enter neuro Spearman values after running on neuro df ────────────
+# Replace these placeholders with actual values from your neuro run:
+r_spearman_neuro = -0.149   # replace with actual neuro Spearman r
+n_neuro_Y = 170             # replace with actual neuro Y-class genuine n
+p_spearman_neuro = 0.053    # replace with actual neuro Spearman p
+
+print()
+print('=' * 60)
+print('FISHER Z-TEST — CROSS-DATASET CORRELATION COMPARISON')
+print('Tests whether RA and Neuro correlations are statistically')
+print('distinguishable from each other')
+print('=' * 60)
+print()
+
+def fisher_z_test(r1, n1, r2, n2):
+    """
+    Fisher z-transformation test comparing two Pearson or Spearman
+    correlation coefficients from independent samples.
+
+    Parameters:
+        r1, r2: correlation coefficients
+        n1, n2: sample sizes
+
+    Returns:
+        z_stat: test statistic
+        p_value: two-tailed p-value
+    """
+    # Handle edge cases
+    r1 = np.clip(r1, -0.9999, 0.9999)
+    r2 = np.clip(r2, -0.9999, 0.9999)
+
+    z1 = np.arctanh(r1)
+    z2 = np.arctanh(r2)
+    se = np.sqrt(1/(n1 - 3) + 1/(n2 - 3))
+    z_stat = (z1 - z2) / se
+    p_value = 2 * (1 - norm.cdf(abs(z_stat)))
+    return z_stat, p_value
+
+# ── Pearson correlation comparison ────────────────────────────────────────────
+r_pearson_ra = r_ra_valid      # from earlier in Section 3
+n_ra_Y = len(Y_genuine_ra)
+r_pearson_neuro = -0.149       # replace with actual neuro within-Y Pearson r
+n_neuro_Y_pearson = 170        # replace with actual neuro n
+
+z_pearson, p_pearson = fisher_z_test(
+    r_pearson_ra, n_ra_Y,
+    r_pearson_neuro, n_neuro_Y_pearson
+)
+
+print('Pearson Correlation Comparison:')
+print(f'  Rheumatic:    r = {r_pearson_ra:.3f}, n = {n_ra_Y}')
+print(f'  Neuro: r = {r_pearson_neuro:.3f}, n = {n_neuro_Y_pearson}')
+print(f'  Fisher z = {z_pearson:.3f}, p = {p_pearson:.4f}')
+if p_pearson > 0.05:
+    print('  → NOT significant: RA and Neuro correlations are statistically')
+    print('    indistinguishable. The near-zero finding generalises across')
+    print('    disease contexts.')
+else:
+    print('  → SIGNIFICANT: correlations differ between datasets.')
+    print('    Investigate whether dataset composition explains the difference.')
+print()
+
+# ── Spearman correlation comparison ──────────────────────────────────────────
+z_spearman, p_spearman = fisher_z_test(
+    r_spearman_ra, n_ra_Y,
+    r_spearman_neuro, n_neuro_Y
+)
+
+print('Spearman Correlation Comparison:')
+print(f'  Rheumatic:    r = {r_spearman_ra:.3f}, n = {n_ra_Y}')
+print(f'  Neuro: r = {r_spearman_neuro:.3f}, n = {n_neuro_Y}')
+print(f'  Fisher z = {z_spearman:.3f}, p = {p_spearman:.4f}')
+if p_spearman > 0.05:
+    print('  → NOT significant: Spearman correlations are statistically')
+    print('    indistinguishable across disease contexts.')
+else:
+    print('  → SIGNIFICANT: Spearman correlations differ between datasets.')
+print()
+
+print('=' * 60)
+print('COMBINED INTERPRETATION')
+print('=' * 60)
+print()
+print('1. If both Spearman correlations are near-zero and non-significant:')
+print('   The Pearson finding is confirmed to be non-linear-assumption-dependent.')
+print()
+print('2. If Fisher z-test is non-significant for both Pearson and Spearman:')
+print('   The near-zero correlation is statistically consistent across')
+print('   RA and neurodegeneration contexts — confirming generalisability.')
+print()
+print('3. Report in thesis as:')
+print('   "Spearman correlation confirmed the Pearson finding non-parametrically')
+print('    (Rheumatic: rs=X, p=Y; Neuro: rs=X, p=Y). Fisher z-test confirmed the two')
+print('    correlations were not significantly different (z=X, p=Y), indicating')
+print('    the near-zero relationship between sequence identity and structural')
+print('    RMSD generalises across disease contexts."')

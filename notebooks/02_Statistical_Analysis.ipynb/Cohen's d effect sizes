@@ -1,0 +1,13 @@
+# ── Cohen's d effect sizes ────────────────────────────────────────
+def cohens_d(group1, group2):
+    pooled_std = np.sqrt((np.std(group1, ddof=1)**2 + np.std(group2, ddof=1)**2) / 2)
+    return (np.mean(group1) - np.mean(group2)) / pooled_std
+
+d_blosum   = cohens_d(Y_group['BLOSUM80 score'].dropna(), N_group['BLOSUM80 score'].dropna())
+d_identity = cohens_d(Y_group['Identity percentage'].dropna(), N_group['Identity percentage'].dropna())
+d_coverage = cohens_d(Y_group['Alignment_coverage_sequence'].dropna(), N_group['Alignment_coverage_sequence'].dropna())
+
+print("=== Cohen's d Effect Sizes ===")
+print(f'BLOSUM80:   d = {d_blosum:.3f}  (large — reflects class construction)')
+print(f'Identity %: d = {d_identity:.3f}  (large — reflects class construction)')
+print(f'Coverage %: d = {d_coverage:.3f}  (large — reflects class construction)')

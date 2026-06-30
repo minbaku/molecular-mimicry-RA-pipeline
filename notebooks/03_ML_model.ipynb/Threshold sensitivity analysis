@@ -1,0 +1,31 @@
+# ── Threshold sensitivity table ───────────────────────────────────
+# Main dataset rates computed from df (correct)
+main_rates = {}
+for thresh in [1.0, 1.5, 2.0]:
+    main_rates[thresh] = (df['Structural RMSD'] < thresh).sum() / len(df)
+    print(f'Main dataset mimic rate at {thresh} Å: {main_rates[thresh]:.3f} ({(df["Structural RMSD"] < thresh).sum()}/{len(df)})')
+
+print()
+print('Cross-pair background rates:')
+print('  These CANNOT be computed from the main df — they come from a separate experiment.')
+print('  1.0 Å: 55.9% (76/136)')
+print('  1.5 Å: 85.3% (116/136)')
+print('  2.0 Å: 91.9% (125/136)')
+print()
+
+table6 = pd.DataFrame({
+    'RMSD Threshold (Å)':  [1.0, 1.5, 2.0],
+    'Main Dataset Rate':   [f'{main_rates[1.0]:.3f} ({(df["Structural RMSD"]<1.0).sum()}/399)',
+                            f'{main_rates[1.5]:.3f} ({(df["Structural RMSD"]<1.5).sum()}/399)',
+                            f'{main_rates[2.0]:.3f} ({(df["Structural RMSD"]<2.0).sum()}/399)'],
+    'Cross-Pair Rate':     ['55.9% (76/136)', '85.3% (116/136)', '91.9% (125/136)'],
+    'Discrimination Ratio':['0.71', '0.66', '0.71']
+})
+print('=== Table 6: Threshold Sensitivity ===')
+print(table6.to_string(index=False))
+print('\n=== Table 6 — uses len(df) dynamically ===')
+n_total = len(df)
+for thresh in [1.0, 1.5, 2.0]:
+    n_mimics = (df['Structural RMSD'] < thresh).sum()
+    rate = n_mimics / n_total
+    print(f'At {thresh} Å: {n_mimics}/{n_total} = {rate:.3f}'

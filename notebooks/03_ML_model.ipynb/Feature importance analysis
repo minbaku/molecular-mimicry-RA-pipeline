@@ -1,0 +1,13 @@
+# ── Feature importances ───────────────────────────────────────────
+importance_df = pd.DataFrame({
+    'Feature': FEATURES,
+    'Importance': rf_model.feature_importances_
+}).sort_values('Importance', ascending=False)
+
+print('=== Feature Importances ===')
+print(importance_df.to_string(index=False))
+
+seq_features = ['BLOSUM80 score', 'Identity percentage', 'Alignment length (Sequence)',
+                'Identical aa', 'BLOSUM80_per_residue', 'Alignment_coverage_sequence']
+seq_importance = importance_df[importance_df['Feature'].isin(seq_features)]['Importance'].sum()
+print(f'\nSequence features total importance: {seq_importance:.3f} ({seq_importance*100:.1f}%)')

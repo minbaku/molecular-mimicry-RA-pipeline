@@ -1,0 +1,35 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import cross_val_score
+
+# Use your existing feature matrix X and labels y
+# Make sure missing values are already imputed
+
+n_estimators_range = range(50, 501, 50)
+auc_scores = []
+
+for n in n_estimators_range:
+    rf = RandomForestClassifier(
+        n_estimators=n,
+        max_depth=10,
+        min_samples_split=5,
+        min_samples_leaf=2,
+        class_weight='balanced',
+        random_state=42
+    )
+    scores = cross_val_score(rf, X, y, cv=5, scoring='roc_auc')
+    auc_scores.append(scores.mean())
+    print(f"n_estimators={n}, AUC={scores.mean():.4f}")
+
+plt.figure(figsize=(10, 6))
+plt.plot(list(n_estimators_range), auc_scores, marker='o', color='steelblue', linewidth=2)
+plt.axvline(x=200, color='coral', linestyle='--', label='Chosen value (200)')
+plt.xlabel('Number of Trees (n_estimators)', fontsize=13)
+plt.ylabel('Mean AUC (5-fold CV)', fontsize=13)
+plt.title('Random Forest Performance vs Number of Trees', fontsize=14)
+plt.legend(fontsize=11)
+plt.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.savefig('auc_vs_nestimators.png', dpi=300, bbox_inches='tight')
+plt.show()

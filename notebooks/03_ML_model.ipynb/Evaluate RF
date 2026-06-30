@@ -1,0 +1,10 @@
+# ── Evaluate RF (Y vs N, 2.0 Å) ───────────────────────────────────
+y_pred       = rf_model.predict(X_test)
+y_pred_proba = rf_model.predict_proba(X_test)[:, 1]
+auc          = roc_auc_score(y_test, y_pred_proba)
+cm           = confusion_matrix(y_test, y_pred)
+
+print('=== RF Performance: Y vs N at 2.0 Å (held-out test set, n=80) ===')
+print(classification_report(y_test, y_pred, target_names=['Non-Mimic (N)', 'Confirmed Mimic (Y)']))
+print(f'AUC-ROC: {auc:.3f}')
+print(f'Confusion matrix:\n{cm}')

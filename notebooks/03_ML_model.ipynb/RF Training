@@ -1,4 +1,4 @@
-# ── ESSENTIAL: Train/test split + RF training (Y vs N, 2.0 Å) ────────────────
+# ── Train/test split + RF training (Y vs N, 2.0 Å) ────────────────
 # Vision Point 3: Document the imputation strategy explicitly
 print(f"N-class entries with non-zero BLAST: {((df['RMSD_Mimic_Target (Y)']=='N') & (df['BLOSUM80 score']>0)).sum()}")
 print("NOTE: fillna(0) treats genuine no-BLAST-hit as zero, not as missing.")

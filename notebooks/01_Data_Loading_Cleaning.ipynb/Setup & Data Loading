@@ -15,7 +15,7 @@ from matplotlib.patches import Patch
 print('All libraries loaded successfully')
 
 # ── Load dataset ───────────────────────────────────────────────────
-df = pd.read_excel('Targets_for_ML.xlsx', sheet_name='Sheet1')
+df = pd.read_excel('Targets_for_ML.xlsx', sheet_name='Sheet1') # ← change to 'ML_targets_final.csv' for the Rheumatic dataset
 print('Shape:', df.shape)
 print('\nLabel counts:')
 print(df['RMSD_Mimic_Target (Y)'].value_counts())

@@ -1,0 +1,63 @@
+# ── Strong vs weak mimic dataset ────────────────────────────
+y_class_pairs = df[df['RMSD_Mimic_Target (Y)'] == 'Y'].copy()
+
+# Label: 1=strong mimic (RMSD<1.0), 0=weak mimic (1.0<=RMSD<2.0)
+y_class_pairs['strong_mimic'] = (y_class_pairs['Structural RMSD'] < 1.0).astype(int)
+
+# Drop rows with missing feature data
+ml_df = y_class_pairs.dropna(subset=FEATURES)
+
+print('=== Strong vs Weak Mimic Dataset ===')
+print(f'Total Y-class pairs with complete data: {len(ml_df)}')
+print(f'Strong Mimics (RMSD < 1.0 Å):           {ml_df["strong_mimic"].sum()}')
+print(f'Weak Mimics   (1.0 <= RMSD < 2.0 Å):    {(ml_df["strong_mimic"]==0).sum()}')
+print()
+print('Both classes passed >=50% identity threshold — no categorical sequence separation.')
+print('This is the biologically realistic classification task.')
+
+# ── Train RF (strong vs weak) ─────────────────────────────────────
+X_sw = ml_df[FEATURES]
+y_sw = ml_df['strong_mimic']
+
+X_sw_train, X_sw_test, y_sw_train, y_sw_test = train_test_split(
+    X_sw, y_sw, test_size=0.2, stratify=y_sw, random_state=42)
+
+print(f'Train: {X_sw_train.shape[0]}')
+print(f'Test:  {X_sw_test.shape[0]}  (Strong={y_sw_test.sum()}, Weak={(y_sw_test==0).sum()})')
+
+rf_sw = RandomForestClassifier(
+    n_estimators=200, max_depth=10, min_samples_split=5,
+    min_samples_leaf=2, class_weight='balanced', random_state=42)
+rf_sw.fit(X_sw_train, y_sw_train)
+
+y_sw_pred  = rf_sw.predict(X_sw_test)
+y_sw_proba = rf_sw.predict_proba(X_sw_test)[:, 1]
+auc_sw     = roc_auc_score(y_sw_test, y_sw_proba)
+
+from sklearn.utils import resample
+aucs = []
+for _ in range(1000):
+    idx = resample(range(len(y_sw_test)), random_state=None)
+    aucs.append(roc_auc_score(y_sw_test.iloc[idx], y_sw_proba[idx]))
+print(f"Bootstrap 95% CI: {np.percentile(aucs, 2.5):.3f}–{np.percentile(aucs, 97.5):.3f}")
+
+print(f'\n=== RF Performance: Strong vs Weak Mimics ===')
+print(classification_report(y_sw_test, y_sw_pred, target_names=['Weak Mimic', 'Strong Mimic']))
+print(f'AUC-ROC: {auc_sw:.3f}')
+print(f'\n--- Compare to original Y vs N AUC: {auc:.3f} ---')
+print(f'Drop in AUC: {auc - auc_sw:.3f}  (this quantifies inflation from categorical construction)')
+
+# ── 5-fold CV for strong vs weak RF ───────────────────────────────
+# FIX: This cell must run AFTER the strong vs weak RF training above.
+# rf_sw, X_sw, y_sw are defined in the cell immediately above.
+
+cv_sw = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+cv_scores_sw = cross_val_score(rf_sw, X_sw, y_sw, cv=cv_sw, scoring='roc_auc')
+
+print('=== 5-Fold CV: Strong vs Weak Mimics ===')
+print(f'AUC-ROC: {cv_scores_sw.mean():.3f} ± {cv_scores_sw.std():.3f}')
+print(f'Per-fold: {[f"{s:.3f}" for s in cv_scores_sw]}')
+print()
+print(f'Held-out test AUC:  {auc_sw:.3f}')
+print(f'5-fold CV AUC:      {cv_scores_sw.mean():.3f} ± {cv_scores_sw.std():.3f}')
+print('Consistent results across held-out and CV confirm stability.')

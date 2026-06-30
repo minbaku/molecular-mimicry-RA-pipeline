@@ -1,0 +1,17 @@
+# ── Feature list for all RF analyses ───────────────────────────────
+FEATURES = [
+    'BLOSUM80 score',
+    'Identity percentage',
+    'Alignment length (Sequence)',
+    'Identical aa',
+    'pathogen length',
+    'Human length',
+    '%Rank_EL(X)',
+    'Aff(nM)(X)',
+    'Structural alignment coverage %',
+    'BLOSUM80_per_residue',
+    'Alignment_coverage_sequence'
+    # NOTE: Structural RMSD and TM-align score excluded to prevent label leakage
+]
+print(f'Feature count: {len(FEATURES)}')
+print(FEATURES)

@@ -1,0 +1,41 @@
+# ── FIGURE 4: Boxplots — sequence features by class ───────────────────────────
+fig, axes = plt.subplots(1, 3, figsize=(15, 7))
+
+for i, (col, title) in enumerate([
+    ('BLOSUM80 score',           'BLOSUM80 Score'),
+    ('Identity percentage',      'Sequence Identity (%)'),
+    ('Alignment_coverage_sequence', 'Alignment Coverage (%)')
+]):
+    data_by_class = [
+        strong_mimics[col].dropna(),
+        weak_mimics[col].dropna(),
+        non_mimics[col].dropna()
+    ]
+    bp = axes[i].boxplot(data_by_class, patch_artist=True, widths=0.6)
+    for patch, color in zip(bp['boxes'], [strong_color, weak_color, non_color]):
+        patch.set_facecolor(color); patch.set_alpha(0.7)
+
+    # Jitter points
+    for j, (data, color) in enumerate(zip(data_by_class, [strong_color, weak_color, non_color])):
+        axes[i].scatter(np.random.normal(j+1, 0.04, len(data)), data,
+                        alpha=0.3, s=15, color=color, edgecolors='white', linewidth=0.5)
+
+    # p-values
+    p_sw, _ = mannwhitneyu(data_by_class[0], data_by_class[1], alternative='two-sided'), None
+    p_sw = mannwhitneyu(data_by_class[0], data_by_class[1], alternative='two-sided').pvalue
+    p_wn = mannwhitneyu(data_by_class[1], data_by_class[2], alternative='two-sided').pvalue
+
+    axes[i].annotate(f'strong vs weak: p={p_sw:.3f}\nweak vs non: p={p_wn:.4f}',
+                     xy=(0.5, 1.1), xycoords='axes fraction', ha='center', fontsize=8,
+                     bbox=dict(boxstyle='round', facecolor='white', alpha=0.8))
+    axes[i].set_xticklabels(['Strong\n(< 1.0 Å)', 'Weak\n(1.0–2.0 Å)', 'Non-Mimic\n(≥ 2.0 Å)'],
+                             fontsize=9)
+    axes[i].set_title(title, fontsize=12, fontweight='bold')
+    axes[i].grid(True, alpha=0.3, axis='y')
+
+plt.suptitle('Sequence Feature Distributions Across Structural Classes',
+             fontsize=14, fontweight='bold')
+plt.tight_layout()
+plt.savefig('figure4_boxplots.png', dpi=300, bbox_inches='tight')
+plt.show()
+print('Figure 4 saved')

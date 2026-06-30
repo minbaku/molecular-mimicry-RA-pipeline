@@ -1,0 +1,31 @@
+# ── FIGURE 3: RMSD distribution — three classes ───────────────────────────────
+fig, axes = plt.subplots(1, 2, figsize=(14, 6))
+
+for group, color, label in [
+    (strong_mimics, strong_color, f'Strong Mimics (< 1.0 Å, n={len(strong_mimics)})'),
+    (weak_mimics,   weak_color,   f'Weak Mimics (1.0–2.0 Å, n={len(weak_mimics)})'),
+    (non_mimics,    non_color,    f'Non-Mimics (≥ 2.0 Å, n={len(non_mimics)})')
+]:
+    axes[0].hist(group['Structural RMSD'].dropna(), bins=25, color=color,
+                 alpha=0.7, label=label, edgecolor='white', linewidth=1)
+    sns.kdeplot(data=group['Structural RMSD'].dropna(), ax=axes[1],
+                color=color, fill=True, alpha=0.3, linewidth=2, label=label)
+
+for ax in axes:
+    ax.axvline(x=1.0, color=strong_color, linestyle='-',  linewidth=2, label='1.0 Å')
+    ax.axvline(x=2.0, color=non_color,    linestyle='--', linewidth=2, label='2.0 Å')
+    ax.set_xlabel('Structural RMSD (Å)', fontsize=12)
+    ax.legend(fontsize=9)
+    ax.grid(True, alpha=0.3)
+
+axes[0].set_ylabel('Number of Peptide Pairs', fontsize=12)
+axes[0].set_title('RMSD Distribution by Class', fontsize=13, fontweight='bold')
+axes[1].set_ylabel('Density', fontsize=12)
+axes[1].set_title('RMSD Density Distribution', fontsize=13, fontweight='bold')
+
+plt.suptitle('Structural RMSD Distribution at 1.0 Å and 2.0 Å Thresholds',
+             fontsize=14, fontweight='bold')
+plt.tight_layout()
+plt.savefig('figure3_rmsd_distribution.png', dpi=300, bbox_inches='tight')
+plt.show()
+print('Figure 3 saved')

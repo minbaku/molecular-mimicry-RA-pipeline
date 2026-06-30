@@ -1,0 +1,45 @@
+# ── Mann-Whitney U — THREE LAYERS ─────────────────────────────────
+# Layer A: Y vs genuine negatives (biologically valid, low power by design)
+# Layer B: Y vs ALL N including cross-pairs (significant but artefactual)
+# Layer C: Strong vs Weak (no artefact — both passed same sequence filter)
+
+from scipy.stats import mannwhitneyu
+bonferroni = 0.05 / 3  # three simultaneous tests
+print(f"Bonferroni threshold: {bonferroni:.4f}\n")
+
+features_mw = [
+    ('BLOSUM80 score', 'BLOSUM80 score'),
+    ('Identity %',    'Identity percentage'),
+    ('Coverage %',    'Alignment_coverage_sequence'),
+]
+
+# ── LAYER A: Y vs genuine negatives only ──────────────────────────────────────
+print("=== Mann-Whitney U Tests — Y vs GENUINE Negatives Only ===")
+print("(This was the original test producing p=0.19, 0.08, 0.10)")
+print(f"N-class n={len(genuine_negatives)} — low power explains non-significance\n")
+
+for name, col in features_mw:
+    y_vals = Y_group[col].dropna()
+    n_vals = genuine_negatives[col].dropna()
+    if len(n_vals) > 0:
+        u, p = mannwhitneyu(y_vals, n_vals, alternative='two-sided')
+        print(f"{name}: U={u:.0f}, p={p:.4f}, "
+              f"Y_mean={y_vals.mean():.2f}, N_mean={n_vals.mean():.2f}, "
+              f"n_genuine_N={len(n_vals)}")
+    else:
+        print(f"{name}: No genuine negatives with data")
+
+# ── LAYER B: Y vs ALL N-class (artefact demonstration) ───────────────────────
+print("\n=== Mann-Whitney U Tests — Y vs ALL N-class (current code) ===")
+print("(Includes cross-paired zeros — significant results reflect construction artefact)\n")
+
+for name, col in features_mw:
+    y_vals = Y_group[col].dropna()
+    n_vals = N_group[col].dropna()
+    u, p = mannwhitneyu(y_vals, n_vals, alternative='two-sided')
+    sig = "YES (ARTEFACT)" if p < bonferroni else "NO"
+    print(f"{name}: U={u:.0f}, p={p:.4f}, sig={sig}, "
+          f"Y_mean={y_vals.mean():.2f}, N_mean={n_vals.mean():.2f}")
+
+print("\nNOTE: Significant results reflect categorical class construction, "
+      "NOT independent evidence of sequence-based mimicry discrimination.")

@@ -1,0 +1,26 @@
+# ── FIGURE 6: Confusion matrix ─────────────────────────────────
+fig, axes = plt.subplots(1, 2, figsize=(14, 6))
+
+# Raw counts
+sns.heatmap(cm, annot=True, fmt='d', cmap='Blues',
+            xticklabels=['Predicted N', 'Predicted Y'],
+            yticklabels=['Actual N', 'Actual Y'],
+            linewidths=2, linecolor='white', ax=axes[0], cbar=False,
+            annot_kws={'size': 16, 'weight': 'bold'})
+axes[0].set_title('Confusion Matrix (Counts)', fontsize=13, fontweight='bold')
+
+# Percentage normalised
+cm_pct = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis] * 100
+sns.heatmap(cm_pct, annot=True, fmt='.1f', cmap='Blues',
+            xticklabels=['Predicted N', 'Predicted Y'],
+            yticklabels=['Actual N', 'Actual Y'],
+            linewidths=2, linecolor='white', ax=axes[1], cbar=False,
+            annot_kws={'size': 16, 'weight': 'bold'})
+axes[1].set_title('Confusion Matrix (% per actual class)', fontsize=13, fontweight='bold')
+
+plt.suptitle('Classification Performance — Random Forest on Held-Out Test Set',
+             fontsize=14, fontweight='bold')
+plt.tight_layout()
+plt.savefig('figure8_confusion_matrix.png', dpi=300, bbox_inches='tight')
+plt.show()
+print('Figure 8 saved')

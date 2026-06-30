@@ -1,0 +1,24 @@
+# ── ESSENTIAL: Train/test split + RF training (Y vs N, 2.0 Å) ────────────────
+# Vision Point 3: Document the imputation strategy explicitly
+print(f"N-class entries with non-zero BLAST: {((df['RMSD_Mimic_Target (Y)']=='N') & (df['BLOSUM80 score']>0)).sum()}")
+print("NOTE: fillna(0) treats genuine no-BLAST-hit as zero, not as missing.")
+print("      This is correct for cross-paired N-class entries by construction.")
+print("      The 9 genuine negatives retain their actual BLAST values.\n")
+
+X = df[FEATURES].fillna(0)   # zeros = genuine no-BLAST-hit, not imputed missing
+y = (df['RMSD_Mimic_Target (Y)'] == 'Y').astype(int)
+
+print(f'X shape: {X.shape}')
+print(f'Missing values: {X.isnull().sum().sum()}  (should be 0)')
+print(f'N-class entries with non-zero BLAST: {((df["RMSD_Mimic_Target (Y)"]=="N") & (df["BLOSUM80 score"]>0)).sum()}')
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, stratify=y, random_state=42)
+print(f'\nTrain: {X_train.shape[0]} (Y={y_train.sum()}, N={(y_train==0).sum()})')
+print(f'Test:  {X_test.shape[0]}  (Y={y_test.sum()}, N={(y_test==0).sum()})')
+
+rf_model = RandomForestClassifier(
+    n_estimators=200, max_depth=10, min_samples_split=5,
+    min_samples_leaf=2, class_weight='balanced', random_state=42)
+rf_model.fit(X_train, y_train)
+print('\nModel trained successfully')

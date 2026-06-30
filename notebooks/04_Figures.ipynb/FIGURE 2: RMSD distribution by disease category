@@ -1,0 +1,142 @@
+# ── FIGURE 2: RMSD distribution by disease category ───────────────────────────
+# ════════════════════════════════════════════════════════════════════════════
+#  CONFIG — this is the ONLY block you need to edit when switching datasets
+# ════════════════════════════════════════════════════════════════════════════
+DATASET = 'Auto'   # ← change to 'Neuro' for the neurodegenerative dataset
+
+# ── Disease maps (built from thesis pathogen-selection literature) ───────────
+DISEASE_MAPS = {
+    'Auto': {
+        'base': {
+            'P.copri': 'RA', 'P.mirabilis': 'RA', 'E.coli': 'RA', 'E.coli ': 'RA',
+            'M.tuberculosis': 'RA', 'P.gingivalis': 'RA', 'HERV-K10': 'RA',
+            'A.finegoldii': 'SLE', 'A.johnsonii': 'SLE', 'B.finegoldii': 'SLE',
+            'B.intestinalis': 'SLE', 'C.ochracea': 'SLE', 'C.sputigena': 'SLE',
+            'B.thetaiotaomicron ': 'SLE', 'O.splanchnicus ': 'SLE', 'L.grayi ': 'SLE',
+            'Parvovirus B19': 'SLE', 'Torque teno virus': 'SLE', 'P.mendocina': 'SLE',
+            'HSV-1': 'SSc', 'H.pylori': 'SSc',
+            'C.jejuni': 'GBS',
+            'Y.enterocolitica': 'AS', 'Y.pseudotuberculosis': 'AS', 'S.typhimurium': 'AS',
+            'S.pyogenes': 'SC',
+            'HTLV-1': 'HAM/TSP',
+        },
+        # ── FIX REQUIRED: organisms with multiple proteins spanning categories ──
+        'overrides': {
+            ('B.fragilis', 'hsp70'): 'RA',                  # CONFIRM: RA or SLE?
+            ('EBV', 'gp110'): 'RA',
+            ('EBV', 'EBNA1'): 'SLE',                        # CONFIRM: SLE or SSc?
+            ('HCMV', 'UL70'): 'SSc',
+            ('HCMV', 'pp65'): 'SLE',
+            ('K.pneumoniae ', 'L-asparaginase'): 'RA',
+            ('R.intestinalis', 'DNA Cytosine Methyltransferase'): 'RA',  # CONFIRM: RA or SLE?
+        },
+        'order': ['RA', 'SLE', 'AS', 'SSc', 'SC', 'GBS', 'HAM/TSP'],
+    },
+    'Neuro': {
+        'base': {
+            'S.typhi': 'AD', 'C.jejuni': 'AD',
+            'S.typhimurium': 'PD', 'EBV': 'PD',
+            'A.castellanii ': 'MS', 'MSRE': 'MS', 'SFV': 'MS', 'C.pneumoniae': 'MS',
+            'H.influenzae': 'MS', 'HBV': 'MS', 'Akkermansia muciniphila': 'MS',
+            'Prevotella intermedia': 'MS',
+            'B.burgdorferi': 'Lyme',
+            'HIV-1': 'HIV-AN',
+            'C.perfringens': 'NMO',
+            'A.calcoaceticus': 'TSE', 'A.calcoaceticus ': 'TSE',
+            'Acinetobacter calcoaceticus': 'TSE', 'Pseudomonas aeruginosa': 'TSE',
+        },
+        'overrides': {
+            ('E.coli', 'Cdt'): 'AD',
+            ('E.coli', 'Major Curlin'): 'PD',
+        },
+        'order': ['AD', 'PD', 'MS', 'Lyme', 'HIV-AN', 'NMO', 'TSE'],
+    },
+}
+
+# ════════════════════════════════════════════════════════════════════════════
+#  Everything below this line is dataset-agnostic — no further edits needed
+# ════════════════════════════════════════════════════════════════════════════
+np.random.seed(42)
+config = DISEASE_MAPS['Auto']
+base_map, protein_overrides, disease_order_full = config['base'], config['overrides'], config['order']
+
+def assign_disease(row):
+    key = (row['Organism'], row['Protein'])
+    if key in protein_overrides:
+        return protein_overrides[key]
+    return base_map.get(row['Organism'], 'UNMAPPED')
+
+df['Disease_Category'] = df.apply(assign_disease, axis=1)
+
+print(f"[{DATASET}] Disease category counts:")
+print(df['Disease_Category'].value_counts())
+if 'UNMAPPED' in df['Disease_Category'].values:
+    unmapped_orgs = df[df['Disease_Category'] == 'UNMAPPED']['Organism'].unique()
+    print(f"\nWARNING: unmapped organisms — {list(unmapped_orgs)}")
+    print("Add these to the 'base' or 'overrides' dict above before proceeding.")
+
+disease_order = [d for d in disease_order_full if d in df['Disease_Category'].unique()]
+
+fig, ax = plt.subplots(figsize=(14, 8))
+positions = np.arange(len(disease_order))
+width = 0.38
+
+for i, disease in enumerate(disease_order):
+    sub = df[df['Disease_Category'] == disease]
+    y_sub = sub[sub['RMSD_Mimic_Target (Y)'] == 'Y']['Structural RMSD'].dropna()
+    n_sub = sub[sub['RMSD_Mimic_Target (Y)'] == 'N']['Structural RMSD'].dropna()
+
+    if len(y_sub) > 0:
+        parts = ax.violinplot([y_sub], positions=[i - width/2], widths=width*1.6,
+                               showmeans=False, showextrema=False, showmedians=False)
+        for pc in parts['bodies']:
+            pc.set_facecolor('#7fb3d5')
+            pc.set_edgecolor('#1f78b4')
+            pc.set_alpha(0.7)
+        jitter = np.random.normal(i - width/2, 0.03, len(y_sub))
+        ax.scatter(jitter, y_sub, color='#1f78b4', alpha=0.5, s=18, zorder=3)
+        ax.hlines(y_sub.median(), i - width/2 - 0.12, i - width/2 + 0.12,
+                  color='navy', linewidth=2, zorder=4)
+
+    if len(n_sub) > 0:
+        parts = ax.violinplot([n_sub], positions=[i + width/2], widths=width*1.6,
+                               showmeans=False, showextrema=False, showmedians=False)
+        for pc in parts['bodies']:
+            pc.set_facecolor('#f5b585')
+            pc.set_edgecolor('#d95f02')
+            pc.set_alpha(0.7)
+        jitter = np.random.normal(i + width/2, 0.03, len(n_sub))
+        ax.scatter(jitter, n_sub, color='#e8825a', alpha=0.6, s=18, zorder=3)
+        ax.hlines(n_sub.median(), i + width/2 - 0.12, i + width/2 + 0.12,
+                  color='darkred', linewidth=2, zorder=4)
+
+ax.axhline(y=2.0, color='black', linestyle='--', linewidth=1.5,
+           label='RMSD threshold (2.0 Å)', zorder=1)
+
+labels = []
+for disease in disease_order:
+    n_total = len(df[df['Disease_Category'] == disease])
+    labels.append(f'{disease}\n(n={n_total})')
+ax.set_xticks(positions)
+ax.set_xticklabels(labels, fontsize=11)
+
+from matplotlib.patches import Patch
+legend_elements = [
+    Patch(facecolor='#7fb3d5', edgecolor='#1f78b4', label='Confirmed Mimic (Y)'),
+    Patch(facecolor='#f5b585', edgecolor='#d95f02', label='Non-Mimic (N)'),
+    plt.Line2D([0], [0], color='black', linestyle='--', linewidth=1.5, label='RMSD threshold (2.0 Å)')
+]
+ax.legend(handles=legend_elements, fontsize=11, loc='upper right')
+
+ax.set_ylabel('Structural RMSD (Å)', fontsize=13)
+ax.set_ylim(0, 4.0)
+title_disease = 'Autoimmune' if DATASET == 'Auto' else 'Neurodegenerative'
+ax.set_title(f'Structural RMSD Distribution by {title_disease} Disease Category',
+             fontsize=15, fontweight='bold')
+ax.grid(True, alpha=0.2, axis='y')
+
+plt.tight_layout()
+out_name = f'figure2_rmsd_by_disease_{DATASET.lower()}.png'
+plt.savefig(out_name, dpi=300, bbox_inches='tight')
+plt.show()
+print(f'Figure 2 saved as {out_name}')

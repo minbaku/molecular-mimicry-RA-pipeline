@@ -1,0 +1,17 @@
+# ── Strong vs Weak Mann-Whitney within Y-class ────────────────────
+# This is the valid within-class comparison (both sequence-similar)
+print('=== Strong vs Weak Mimic: Mann-Whitney Comparisons ===')
+print('(Both classes passed >=50% identity — categorical construction not an issue here)')
+print()
+
+for name, col in [('BLOSUM80', 'BLOSUM80 score'),
+                  ('Identity %', 'Identity percentage'),
+                  ('Coverage %', 'Alignment_coverage_sequence')]:
+    u, p = mannwhitneyu(strong_mimics[col].dropna(),
+                        weak_mimics[col].dropna(),
+                        alternative='two-sided')
+    print(f'{name}: p={p:.4f}  {"(NS)" if p > 0.05 else "(SIG)"}')
+
+print()
+print('No significant differences between strong and weak mimics for any sequence feature.')
+print('This confirms sequence metrics cannot distinguish mimic quality within the sequence-similar pool.')

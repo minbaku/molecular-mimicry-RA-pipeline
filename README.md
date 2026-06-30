@@ -5,7 +5,7 @@
 [![License: CC BY 4.0](https://img.shields.io/badge/License-CC%20BY%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by/4.0/)
 [![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19262752.svg)](https://doi.org/10.5281/zenodo.19262752)
-[![DOI](https://Preprints.org/badge/DOI/10.20944/preprints202603.2174.v1.svg)](https://doi.org/10.20944/preprints202603.2174.v1)
+[![DOI](https://preprints.org/badge/DOI/10.20944/preprints202603.2174.v1.svg)](https://doi.org/10.20944/preprints202603.2174.v1)
 [![Preprint](https://img.shields.io/badge/Preprint-Zenodo%20%2B%20Preprints.org-green)](https://doi.org/10.5281/zenodo.19262132)
 
 ---

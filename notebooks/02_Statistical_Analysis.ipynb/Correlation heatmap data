@@ -1,0 +1,13 @@
+# ── Correlation heatmap data ──────────────────────────────────────
+corr_cols = [
+    'BLOSUM80 score', 'Identity percentage', 'Alignment length (Sequence)',
+    'Identical aa', 'pathogen length', 'Human length', '%Rank_EL(X)',
+    'Aff(nM)(X)', 'Structural RMSD', 'TM-align score (Human chain 2)',
+    'Structural alignment coverage %', 'BLOSUM80_per_residue',
+    'Alignment_coverage_sequence'
+]
+corr_matrix = df[corr_cols].corr()
+
+print('Key correlations for paper:')
+print(f"Identity % vs Structural RMSD: {corr_matrix.loc['Identity percentage', 'Structural RMSD']:.3f}")
+print(f"BLOSUM80 vs TM-align score:    {corr_matrix.loc['BLOSUM80 score', 'TM-align score (Human chain 2)']:.3f}")

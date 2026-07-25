@@ -95,7 +95,3 @@ print(f"""
 {'pLDDT ≥90 only':<40} {len(Y_hc_90):>5} {'see above':>8}
 """)
 
-# Dynamic primary r — replaces hardcoded comparison text
-r_ra_valid = -0.127  # preprint-consistent value
-print(f"Dynamic primary r for current dataset: {r_ra_valid:.3f}")
-print("Replace hardcoded comparison text with this value")

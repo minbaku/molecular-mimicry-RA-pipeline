@@ -2,9 +2,10 @@
 # At 2.0 Å threshold (n=272: 262 Y-class + 10 N-class with genuine BLAST data)
 valid_272 = df[df['Identity percentage'].notna()]
 r_2A, p_2A = pearsonr(valid_272['Identity percentage'], valid_272['Structural RMSD'])
-print('=== PRIMARY FINDING: Within-Y-Class Pearson Correlation ===')
+print('=== MIXED-CLUSTER STATISTIC (Y-class + genuine N-class, n=272) ===')
+print('NOT the headline finding — mixes two separated clusters, inflating |r| by construction.')
 print(f'At 2.0 Å threshold (n={len(valid_272)}): r={r_2A:.3f}, p={p_2A:.4f}, R²={r_2A**2:.3f}')
-print(f'  → Sequence identity explains {r_2A**2*100:.1f}% of variance in RMSD')
+print('The valid within-Y-class-only statistic is computed below as r_ra_valid.')
 print()
 
 # At 1.0 Å threshold (strong mimics only, n=159)
